@@ -14,7 +14,7 @@ import picocli.CommandLine.ITypeConverter;
 public class ExtensionSettingsConverter implements ITypeConverter<URLClassLoader> {
 	@Override
 	public URLClassLoader convert(String value) throws Exception {
-		final URL[] urls = Files.toURL(new File(value), ".jar", 1);
+		final URL[] urls = Files.getJarURL(new File(value), 1);
 		if (urls.length==0) {
 			throw new IllegalArgumentException("Found no jar in "+value);
 		}
