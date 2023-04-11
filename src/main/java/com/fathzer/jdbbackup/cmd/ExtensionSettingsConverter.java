@@ -1,11 +1,11 @@
 package com.fathzer.jdbbackup.cmd;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 
 import com.fathzer.jdbbackup.JDbBackup;
-import com.fathzer.jdbbackup.utils.Files;
+import com.fathzer.plugin.loader.utils.FileUtils;
 
 import picocli.CommandLine.ITypeConverter;
 
@@ -14,7 +14,7 @@ import picocli.CommandLine.ITypeConverter;
 public class ExtensionSettingsConverter implements ITypeConverter<URLClassLoader> {
 	@Override
 	public URLClassLoader convert(String value) throws Exception {
-		final URL[] urls = Files.getJarURL(new File(value), 1);
+		final URL[] urls = FileUtils.getJarFiles(Paths.get(value), 1).stream().map(FileUtils::getURL).toArray(URL[]::new);
 		if (urls.length==0) {
 			throw new IllegalArgumentException("Found no jar in "+value);
 		}

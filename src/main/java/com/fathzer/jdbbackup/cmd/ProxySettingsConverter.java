@@ -1,6 +1,6 @@
 package com.fathzer.jdbbackup.cmd;
 
-import com.fathzer.jdbbackup.utils.ProxySettings;
+import com.fathzer.plugin.loader.utils.ProxySettings;
 
 import picocli.CommandLine.ITypeConverter;
 

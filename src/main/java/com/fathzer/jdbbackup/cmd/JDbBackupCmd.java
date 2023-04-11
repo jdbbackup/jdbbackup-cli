@@ -5,7 +5,7 @@ import java.net.URLClassLoader;
 import java.util.concurrent.Callable;
 
 import com.fathzer.jdbbackup.JDbBackup;
-import com.fathzer.jdbbackup.utils.ProxySettings;
+import com.fathzer.plugin.loader.utils.ProxySettings;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -53,7 +53,7 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
         }
 	}
 
-	private void loadExtensions() {
+	private void loadExtensions() throws IOException {
 		for (URLClassLoader extension:extensions) {
 			System.out.println("We are here");
 			JDbBackup.loadPlugins(extension);
