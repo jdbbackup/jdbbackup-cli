@@ -48,7 +48,10 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
 		try {
 			final JDbBackup backup = new JDbBackup();
 			loadExtensions(backup);
-			backup.backup(proxy, db, dest);
+			if (proxy!=null) {
+				backup.setProxy(proxy.toProxy(), proxy.getLogin());
+			}
+			backup.backup(db, dest);
 			return ExitCode.OK;
         } catch (IllegalArgumentException e) {
         	err(e);
@@ -68,8 +71,8 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
 			if (sources.isEmpty() && destinations.isEmpty()) {
 				throw new IOException("File "+path+" contains no extension");
 			}
-			backup.getSourceManagers().registerAll(sources);
-			backup.getDestinationManagers().registerAll(destinations);
+			sources.forEach(s -> backup.getSourceManagers().put(s.getScheme(), s));
+			destinations.forEach(d -> backup.getDestinationManagers().put(d.getScheme(), d));
 		}
 	}
 }
