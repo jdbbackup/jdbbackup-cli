@@ -47,7 +47,9 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
 	public Integer call() throws Exception {
 		try {
 			final JDbBackup backup = new JDbBackup();
-			loadExtensions(backup);
+			if (extensions!=null) {
+				loadExtensions(backup);
+			}
 			if (proxy!=null) {
 				backup.setProxy(proxy.toProxy(), proxy.getLogin());
 			}
