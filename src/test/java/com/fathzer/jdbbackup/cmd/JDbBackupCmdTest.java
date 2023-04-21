@@ -7,12 +7,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedConstruction;
 
+import com.fathzer.jdbbackup.DestinationManager;
 import com.fathzer.jdbbackup.JDbBackup;
+import com.fathzer.jdbbackup.SourceManager;
 import com.fathzer.jdbbackup.utils.SystemShutup;
 
 import picocli.CommandLine.ExitCode;
@@ -56,4 +60,25 @@ class JDbBackupCmdTest {
 		}
 	}
 
+	@Test
+	void testExtensions() {
+		try (SystemShutup su = new SystemShutup(false, true)) {
+			final Map<String, SourceManager> sources = new HashMap<>();
+			@SuppressWarnings("rawtypes")
+			final Map<String, DestinationManager> destinations = new HashMap<>();
+			try (MockedConstruction<JDbBackup> mock = mockConstruction(JDbBackup.class, (j,c) -> {
+				when(j.getSourceManagers()).thenReturn(sources);
+				when(j.getDestinationManagers()).thenReturn(destinations);
+			})) {
+				assertEquals (ExitCode.OK, JDbBackupCmd.doIt("-e", "src/test/plugins/jdbbackup-fakesource-1.0.0.jar", "-e", "src/test/plugins/jdbbackup-sftp-1.0.0.jar", "fake://x", "file://backup"));
+				assertEquals(1, sources.size());
+				assertEquals("com.fathzer.jdbbackup.sources.FakeSource", sources.get("fake").getClass().getCanonicalName());
+				assertEquals(1, destinations.size());
+				assertEquals("com.fathzer.jdbbackup.destinations.sftp.SFTPManager", destinations.get("sftp").getClass().getCanonicalName());
+
+				assertEquals (ExitCode.SOFTWARE, JDbBackupCmd.doIt("-e", "src/test/plugins/empty.jar", "fake://x", "file://backup"));
+
+			}
+		}
+	}
 }
