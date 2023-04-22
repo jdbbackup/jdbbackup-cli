@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import com.fathzer.jdbbackup.DestinationManager;
 import com.fathzer.jdbbackup.JDbBackup;
@@ -21,7 +22,7 @@ import picocli.CommandLine.Parameters;
 /** A command line tool to perform backup.
  */
 @Command(name="java com.fathzer.jdbbackup.cmd.JDbBackupCmd", mixinStandardHelpOptions = true, description = "Saves a data source to one or more destinations", usageHelpWidth = 160)
-public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
+public class JDbBackupCmd implements Callable<Integer> {
 	@Parameters(index="0", description="Data base address (for example mysql://user:pwd@host:port/db")
     private String db;
 	@Parameters(index="1", arity = "1..*", description = "Destinations (example sftp://user:pwd@host/filepath)")
@@ -31,6 +32,8 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
 	@Option(names={"-e","--extension"}, description="A jar file that contains an extension (DestinationManager or SourceManager), or a folder containing such jars",arity = "1..*",
 			converter = ExtensionSettingsConverter.class)
 	private List<Path> extensions;
+	
+	private Consumer<Exception> errReporter = Throwable::printStackTrace; 
 	
 	/** Launches the command.
 	 * @param args The command arguments. Run the class without any arguments to know what are the available arguments.
@@ -43,6 +46,14 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
 		return new CommandLine(new JDbBackupCmd()).execute(args);
 	}
 	
+	/** Sets the exception consumer (it is called when JDBBackup throws an exception.
+	 * <br>Default the stack trace to System.err
+	 * @param exConsumer
+	 */
+	public void setExceptionConsumer(Consumer<Exception> exConsumer) {
+		this.errReporter = exConsumer;
+	}
+
 	@Override
 	public Integer call() throws Exception {
 		try {
@@ -56,10 +67,10 @@ public class JDbBackupCmd implements Callable<Integer>, CommandLineSupport {
 			backup.backup(db, dest);
 			return ExitCode.OK;
         } catch (IllegalArgumentException e) {
-        	err(e);
+        	errReporter.accept(e);
         	return ExitCode.USAGE;
         } catch (IOException e) {
-        	err(e);
+        	errReporter.accept(e);
         	return ExitCode.SOFTWARE;
         }
 	}
