@@ -86,9 +86,20 @@ class JDbBackupCmdTest {
 		// Test error from JDBBackup
 		try (SystemShutup su = new SystemShutup(false, true)) {
 			try (MockedConstruction<JDbBackup> mock = mockConstruction(JDbBackup.class, (j,c) -> {
-				doThrow(IllegalArgumentException.class).when(j).backup(anyString(), any());
+				doThrow(IllegalArgumentException.class).when(j).backup(any(), any());
 			})) {
 				assertEquals (ExitCode.USAGE, JDbBackupCmd.doIt("fake://x", "file://backup"));
+				
+				// Test setExceptionConsumer is working
+				JDbBackupCmd cmd = new JDbBackupCmd();
+				cmd.setExceptionConsumer(e -> {
+					if (e instanceof RuntimeException) {
+						throw ((RuntimeException)e);
+					} else {
+						throw new RuntimeException(e);
+					}
+				});
+				assertThrows(IllegalArgumentException.class, () -> cmd.call());
 			}
 		}
 	}
