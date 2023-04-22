@@ -77,7 +77,18 @@ class JDbBackupCmdTest {
 				assertEquals("com.fathzer.jdbbackup.destinations.sftp.SFTPManager", destinations.get("sftp").getClass().getCanonicalName());
 
 				assertEquals (ExitCode.SOFTWARE, JDbBackupCmd.doIt("-e", "src/test/plugins/empty.jar", "fake://x", "file://backup"));
+			}
+		}
+	}
 
+	@Test
+	void testErrors() {
+		// Test error from JDBBackup
+		try (SystemShutup su = new SystemShutup(false, true)) {
+			try (MockedConstruction<JDbBackup> mock = mockConstruction(JDbBackup.class, (j,c) -> {
+				doThrow(IllegalArgumentException.class).when(j).backup(anyString(), any());
+			})) {
+				assertEquals (ExitCode.USAGE, JDbBackupCmd.doIt("fake://x", "file://backup"));
 			}
 		}
 	}
