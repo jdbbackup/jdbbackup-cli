@@ -9,6 +9,7 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -82,25 +83,19 @@ class JDbBackupCmdTest {
 	}
 
 	@Test
-	void testErrors() {
+	void testErrors() throws Exception {
 		// Test error from JDBBackup
-		try (SystemShutup su = new SystemShutup(false, true)) {
-			try (MockedConstruction<JDbBackup> mock = mockConstruction(JDbBackup.class, (j,c) -> {
-				doThrow(IllegalArgumentException.class).when(j).backup(any(), any());
-			})) {
-				assertEquals (ExitCode.USAGE, JDbBackupCmd.doIt("fake://x", "file://backup"));
-				
-				// Test setExceptionConsumer is working
-				JDbBackupCmd cmd = new JDbBackupCmd();
-				cmd.setExceptionConsumer(e -> {
-					if (e instanceof RuntimeException) {
-						throw ((RuntimeException)e);
-					} else {
-						throw new RuntimeException(e);
-					}
-				});
-				assertThrows(IllegalArgumentException.class, () -> cmd.call());
-			}
+		try (MockedConstruction<JDbBackup> mock = mockConstruction(JDbBackup.class, (j,c) -> {
+			doThrow(IllegalArgumentException.class).when(j).backup(any(), any());
+		})) {
+			// Test setExceptionConsumer is working
+			final JDbBackupCmd cmd = new JDbBackupCmd();
+			final AtomicReference<Exception> ref = new AtomicReference<>();
+			cmd.setExceptionConsumer(e -> {
+				ref.set(e);
+			});
+			assertEquals(ExitCode.USAGE, cmd.call());
+			assertNotNull(ref.get());
 		}
 	}
 }
