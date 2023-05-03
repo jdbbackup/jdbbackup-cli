@@ -46,9 +46,9 @@ public class JDbBackupCmd implements Callable<Integer> {
 		return new CommandLine(new JDbBackupCmd()).execute(args);
 	}
 	
-	/** Sets the exception consumer (it is called when JDBBackup throws an exception.
+	/** Sets the exception consumer (it is called when JDBBackup throws an exception).
 	 * <br>Default the stack trace to System.err
-	 * @param exConsumer
+	 * @param exConsumer A consumer who will receive the exception if any occurs.
 	 */
 	public void setExceptionConsumer(Consumer<Exception> exConsumer) {
 		this.errReporter = exConsumer;
