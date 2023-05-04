@@ -9,7 +9,7 @@ A ready to command line to backup data sources based on [jdbbackup-core](https:/
 ## How to use it
 This application requires Java11+.
 
-The [artifact deployed in Maven central](https://repo1.maven.org/maven2/com/fathzer/jdbbackup-fakesource/1.0.0/jdbbackup-fakesource-1.0.0.jar) is a runnable jar.  
+The [artifact deployed in Maven central](https://repo1.maven.org/maven2/com/fathzer/jdbbackup-cli/1.0.0/jdbbackup-cli-1.0.0.jar) is a runnable jar.  
 Launch it with ```java -jar jdbbackup-cli-1.0.0.jar -h``` to see available options.
 
 This jar manages only mySQL data source and file backup destination. You can add more destinations (S3, SFTP, etc...) using the -e option.  
